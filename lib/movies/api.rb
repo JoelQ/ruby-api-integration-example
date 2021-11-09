@@ -29,7 +29,9 @@ class ThirdPartyApi < Sinatra::Base
   end
 
   post "/new_token" do
-    if params[:client_id] == CLIENT_ID && params[:client_secret] == CLIENT_SECRET
+    json_body = JSON.parse(request.body.read)
+
+    if json_body["client_id"] == CLIENT_ID && json_body["client_secret"] == CLIENT_SECRET
       self.class.generate_new_token
       self.class.token
     else
