@@ -43,4 +43,29 @@ RSpec.describe Consumer::Client do
       expect(movies.length).to eq 2
     end
   end
+
+  describe "#fetch_directors" do
+    it "refreshes token and retries request when given a 401" do
+      stub_request(:get, "#{Consumer::Client::DOMAIN}/directors?token=").
+        to_return(status: 401)
+
+      stub_request(:post, "#{Consumer::Client::DOMAIN}/new_token")
+        .with(body: {client_id: "id", client_secret: "secret"}.to_json)
+        .to_return(body: "good")
+
+      stub_request(:get, "#{Consumer::Client::DOMAIN}/directors?token=good").
+        to_return(body: [
+          {name: "James Cameron", movies: ["Titanic", "Avatar"]},
+          {name: "Russo Bros", movies: ["Avengers: Endgame"]},
+        ].to_json)
+
+      client = Consumer::Client.new(client_id: "id", client_secret: "secret")
+      directors = client.fetch_directors
+
+      cameron = directors.first
+      expect(cameron.name).to eq "James Cameron"
+      expect(cameron.movies).to eq ["Titanic", "Avatar"]
+      expect(directors.length).to eq 2
+    end
+  end
 end
