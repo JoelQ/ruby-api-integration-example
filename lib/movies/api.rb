@@ -9,7 +9,7 @@ class ThirdPartyApi < Sinatra::Base
   HIGHEST_GROSSING_FILMS = [
     { name: "Avatar", director: "James Cameron", gross: 2_847_246_203 },
     { name: "Avengers: Endgame", director: "Russo Bros", gross: 2_797_501_328 },
-    { name: "Titanic", director: "James Cameraon", gross: 2_187_425_379 },
+    { name: "Titanic", director: "James Cameron", gross: 2_187_425_379 },
   ]
 
   def self.token
@@ -28,6 +28,14 @@ class ThirdPartyApi < Sinatra::Base
     end
   end
 
+  get "/directors" do
+    if valid_token?
+      directors.to_json
+    else
+      status 401
+    end
+  end
+
   post "/new_token" do
     json_body = JSON.parse(request.body.read)
 
@@ -39,6 +47,8 @@ class ThirdPartyApi < Sinatra::Base
     end
   end
 
+  private
+
   def valid_token?
     self.class.token && params[:token] == self.class.token && !expired_token?
   end
@@ -46,6 +56,14 @@ class ThirdPartyApi < Sinatra::Base
   # Token is expired approx 1/3 of the time
   def expired_token?
     [true, false, false].sample
+  end
+
+  def directors
+    HIGHEST_GROSSING_FILMS.
+      group_by { |film| film[:director] }.
+      map do |director, films|
+        {director: director, films: films.map {|f| f[:name]} }
+      end
   end
 
   # start the server if ruby file executed directly
