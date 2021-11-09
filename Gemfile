@@ -3,4 +3,9 @@
 source "https://rubygems.org"
 
 gem "sinatra"
-gem "rspec"
+gem "httparty"
+
+group :test do
+  gem "rspec"
+  gem "webmock"
+end
