@@ -6,8 +6,8 @@ module Consumer
   Director = Struct.new(:name, :movies, keyword_init: true)
 
   class Client
-    def initialize(client_id:, client_secret:)
-      @driver = HttpDriver.new(client_id: client_id, client_secret: client_secret, token: "")
+    def initialize(driver:)
+      @driver = driver
     end
 
     def fetch_movies
